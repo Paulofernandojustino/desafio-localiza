@@ -1,0 +1,49 @@
+{
+  "data_asset_type": "Dataset",
+  "expectation_suite_name": "qualidade_dados_vendas",
+  "expectations": [
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": { "column": "location_region" }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": { "column": "location_region" }
+    },
+    {
+        "expectation_type": "expect_column_values_to_be_in_set",
+        "kwargs": { "column": "location_region", "value_set": ["Europe", "South America", "Asia", "Africa", "North America"] }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": { "column": "risk_score" }
+    },
+    {
+       "expectation_type": "expect_column_values_to_match_regex",
+       "kwargs": {
+           "column": "risk_score",
+           "regex": "^[0-9]+(\\.[0-9]+)?$"
+        }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_type_list",
+      "kwargs": { "column": "risk_score", "type_list": ["DoubleType", "IntegerType", "FloatType"] }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": { "column": "transaction_type" }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": { "column": "receiving_address" }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": { "column": "receiving_address" }
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": { "column": "amount" }
+    }
+  ]
+}
