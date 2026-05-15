@@ -85,7 +85,9 @@ O escopo de validação do arquivo **`suite_desafio.json`** opera em três níve
 
 1. Inicialização:
 Na raiz do projeto, execute o comando abaixo no terminal para construir a imagem otimizada e subir os serviços:
-docker-compose up -d --build
+   ```bash
+   docker-compose up -d --build
+   ```
 
 2. Orquestração (Airflow):
 Acesse http://localhost:8080 (Usuário/Senha: admin / admin).
