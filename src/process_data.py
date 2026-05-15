@@ -56,6 +56,18 @@ def main():
         .getOrCreate()
     
     spark.sparkContext.setLogLevel("ERROR")
+    print("><><><><><><><><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><")
+    print("><><><><><><><><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><")
+    print("><><><><><><><><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><")
+    print(">>>>               Pipeline de Processamento Localiza - Desafio Técnico               <<<< ")
+    print(">>>>               Pipeline de Processamento Localiza - Desafio Técnico               <<<< ")
+    print(">>>>               Pipeline de Processamento Localiza - Desafio Técnico               <<<< ")
+    print(">>>>               Pipeline de Processamento Localiza - Desafio Técnico               <<<< ")
+    print(">>>>               Pipeline de Processamento Localiza - Desafio Técnico               <<<< ")
+    print("><><><><><><><><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><")
+    print("><><><><><><><><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><")
+    print("><><><><><><><><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><")
+    
     logger.info("1. Iniciando ingestão de dados...")
     print("1. Iniciando ingestão de dados...")
     df = spark.read.csv("/opt/airflow/data/input/df_fraud_credit.csv", header=True, inferSchema=True)
@@ -83,6 +95,9 @@ def main():
     df_clean = df_clean.withColumn("data_transacao", to_date(from_unixtime(col("timestamp")))) \
                        .withColumn("hora_transacao", date_format(from_unixtime(col("timestamp")), "HH:mm:ss"))
 
+    logger.info(" SALVANDO TABELA INTERMEDIÁRIA (Silver) para análises exploratórias e auditoria...")
+    df_clean.coalesce(1).write.mode("overwrite").parquet("/opt/airflow/data/output/silver/silver_table")
+    
     logger.info("4. Processando Tabela-Resultado 1 (Média de Risk Score)...")
     df_tabela1 = df_clean.groupBy("location_region") \
         .agg(avg("risk_score").alias("media_risk_score")) \
@@ -94,7 +109,7 @@ def main():
         regexp_replace(col("media_risk_score").cast(DecimalType(38,4)).cast("string"), "\\.", ",")
     )
     
-    df_tabela1_output.coalesce(1).write.mode("overwrite").parquet("/opt/airflow/data/output/tabela1_risk_score")
+    df_tabela1_output.coalesce(1).write.mode("overwrite").parquet("/opt/airflow/data/output/gold/tabela1_risk_score")
     
     logger.info("5. Processando Tabela-Resultado 2 (Top 3 Recebimentos Recentes)...")
     # Filtro antecipado
@@ -105,7 +120,7 @@ def main():
     df_tabela2 = df_sales.withColumn("rn", row_number().over(window_spec)) \
         .filter(col("rn") == 1) \
         .orderBy(desc("amount")) \
-        .select("receiving_address", "amount","timestamp","data_transacao", "hora_transacao") \
+        .select("receiving_address", "amount","data_transacao", "hora_transacao") \
         .limit(3)
     
     # Formatação visual final: Decimal (38,4) para String com vírgula
@@ -114,17 +129,17 @@ def main():
         regexp_replace(col("amount").cast("string"), "\\.", ",")
     )
     logger.info("6. Salvando tabela 2.")    
-    df_tabela2_output.coalesce(1).write.mode("overwrite").parquet("/opt/airflow/data/output/tabela2_top3_sales")
+    df_tabela2_output.coalesce(1).write.mode("overwrite").parquet("/opt/airflow/data/output/gold/tabela2_top3_sales")
     
     logger.info("Processamento finalizado com sucesso. Tabelas exportadas.")
     print("><><><><><><><><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><")
     print("><><><><><><><><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><")
     print("><><><><><><><><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><")
-    print("                                                                                           ")
-    print("                                                                                           ")
-    print("Acesse >>>> http://localhost:8081/data_quality_report.html para verificar a qualidade <<<< ")
-    print("                                                                                           ")
-    print("                                                                                           ")
+    print(">>>>               Pipeline de Processamento Localiza - Desafio Técnico               <<<< ")
+    print(">>>>               Pipeline de Processamento Localiza - Desafio Técnico               <<<< ")
+    print(">>>>               Pipeline de Processamento Localiza - Desafio Técnico               <<<< ")
+    print(">>>>               Pipeline de Processamento Localiza - Desafio Técnico               <<<< ")
+    print(">>>>               Pipeline de Processamento Localiza - Desafio Técnico               <<<< ")
     print("><><><><><><><><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><")
     print("><><><><><><><><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><")
     print("><><><><><><><><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><<><><><><><><")

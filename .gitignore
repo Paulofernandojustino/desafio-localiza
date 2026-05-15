@@ -2,11 +2,11 @@
 .env
 __pycache__/
 *.pyc
-*._SUCCESS*
-*SUCCESS*
+# *._SUCCESS*
+# *SUCCESS*
 *.log
-*.part*
-*part*
+# *.part*
+# *part*
 data/input/*.csv
 
 ler_resultados.py
