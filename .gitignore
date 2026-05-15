@@ -1,0 +1,12 @@
+.venv
+.env
+__pycache__/
+*.pyc
+# *._SUCCESS*
+# *SUCCESS*
+*.log
+# *.part*
+# *part*
+data/input/*.csv
+
+ler_resultados.py
