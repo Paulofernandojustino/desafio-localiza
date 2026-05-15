@@ -44,6 +44,8 @@ O pipeline estrutura os dados em camadas lógicas progressivas de refinamento:
    - O requisito original para a Tabela 2 solicitava a manutenção da coluna "timestamp". Em vez de entregar o Unix Epoch bruto, desta forma derivei esse dado para duas novas colunas: "data_transacao" e "hora_transacao".
      - Justificativa Técnica: Em modelagem dimensional (Data Lakes/DW), expor o Epoch time na camada final de consumo gera atrito para analistas de BI e impede otimizações nativas. A separação semântica em Data e Hora permite que a tabela resultante (em Parquet) seja facilmente particionada por "data_transacao" no futuro, reduzindo o custo de I/O em consultas (Partition Discovery e Data Skipping) e entregando o dado pronto para uso em painéis de negócio.
 
+7. Criação de um dashboard: para permitir visualizar os requisitos do desafio e tambem para analisar a silver e o resultado do Data Quality.
+
 ## ESTRUTURA DO PROJETO 
 ```
 desafio_localiza
@@ -92,10 +94,13 @@ Acesse http://localhost:8080 (Usuário/Senha: admin / admin).
 
 3. Visualização de Resultados (Dashboard):
 Acesse http://localhost:8081 para o portal interativo de resultados.
-* Aba Qualidade: Visualização interativa do Data Docs do Great Expectations (diagnóstico de anomalias da fonte).
-![Texto Alternativo](assets/stream_gx.png)
-* Aba Saída do Teste: Visualização nativa das tabelas-resultado (Média por Região e Top 3 Sales) geradas no formato Parquet, sem necessidade de ferramentas de terceiros para o RH ou Avaliador ler os arquivos.
-![Texto Alternativo](assets/stream_resul.png)
+* Aba **Camada Gold (Negócio)**: Visualização das tabelas do Desafio
+   ![Mostra o resultado do desafio](assets/stream_gold.png)
+* Aba **Camada Silver (Tratada)**: Visualização das tabelas do Desafio
+   ![Mostra o resultado da limpeza, antes de gerar para GOLD](assets/stream_silver.png)
+* Aba **Data Quality (RAW)**: Visualização interativa do Data Docs do Great Expectations (diagnóstico de anomalias da fonte).
+![Data quality gerado pelo Great Expectations](assets/stream_dq.png)
+
 
 ## MELHORIAS FUTURAS
 

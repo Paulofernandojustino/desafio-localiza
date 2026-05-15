@@ -6,7 +6,7 @@ import os
 # --- 1. CONFIGURAÇÃO DA PÁGINA ---
 st.set_page_config(
     page_title="Data Pipeline - Localiza",
-    page_icon="🚀",
+    page_icon="⬆️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -49,11 +49,11 @@ Os dados estão estruturados sob a **Arquitetura Medalhão**, garantindo isolame
 st.divider()
 
 # --- 4. ROTEAMENTO DE CAMINHOS ---
-# Ajuste estes caminhos se a sua estrutura física for diferente
+
 PATH_GOLD_TABELA1 = "data/output/gold/tabela1_risk_score/"
 PATH_GOLD_TABELA2 = "data/output/gold/tabela2_top3_sales/"
 PATH_SILVER = "data/output/silver/"
-PATH_GX_DOCS = "gx/uncommitted/data_quality_report.html" # Caminho padrão do Data Docs
+PATH_GX_DOCS = "gx/uncommitted/data_quality_report.html" 
 
 # --- 5. ESTRUTURA DE ABAS ---
 aba1, aba2, aba3 = st.tabs(["📊 Camada Gold (Negócio)", "🔎 Camada Silver (Tratada)", "🛡️ Data Quality (Raw)"])
@@ -101,12 +101,11 @@ with aba2:
 
 with aba3:
     st.header("Relatório Great Expectations - Camada Raw")
-    st.markdown("Validação metadata-driven executada imediatamente após a ingestão (Shift-Left Data Quality).")
+    st.markdown("Validação metadata-driven executada imediatamente após a ingestão (Data Quality).")
     
     html_content = carregar_relatorio_gx(PATH_GX_DOCS)
     
     if html_content:
-        # Renderiza o HTML do Great Expectations dentro de um iframe no Streamlit
         components.html(html_content, height=800, scrolling=True)
     else:
         st.info("""
