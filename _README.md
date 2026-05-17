@@ -1,6 +1,6 @@
 # 🚀 Pipeline de Dados - Desafio Técnico Localiza
 
-Este repositório foi criado para o desafio técnico para engenheiro de dados sênior. Onde se procura aplicar conceitos de contratos de dados, processamento de alto desempenho e observabilidade no processo.
+Este repositório foi criado para o desafio técnico para engenheiro de dados sênior. Onde se procura aplicar conceitos de contratos de dados, processamento de alto desempenho e observalidade no processo.
 
 ## O DESAFIO 
 O objetivo técnico deste pipeline é orquestrar a ingestão de um arquivo CSV transacional e atender aos seguintes requisitos de negócio:
@@ -9,7 +9,7 @@ O objetivo técnico deste pipeline é orquestrar a ingestão de um arquivo CSV t
 3. Limpeza estrutural e higienização dos dados importados.
 4. **Geração de duas tabelas-resultado analíticas**:
    - Tabela 1: Média de "risk_score" agrupada por "location_region", ordenada decrescentemente.
-   - Tabela 2: Filtragem da transação mais recente do tipo 'sale' de cada 'receiving_address', retornando o top 3 dos endereços que movimentaram os maiores valores (amount) neste último evento.
+   - Tabela 2: Top 3 transações mais recentes (timestamp) do tipo "sale" para cada "receiving_address", contendo o endereço, o valor (amount) e a data/hora.
 
 ## STACK TECNOLÓGICA 
 * Motor de Processamento: Python 3.10 + Apache Spark (PySpark 3.5.0)
@@ -29,8 +29,7 @@ O pipeline estrutura os dados em camadas lógicas progressivas de refinamento:
    - Camada Silver (`data/output/silver/`): Aplicação de contratos de qualidade e higienização estrutural. Os dados são persistidos em formato Parquet para acesso analítico rápido.
    - Camada Gold (`data/output/gold/`): Agregações finais e regras de negócio específicas, prontas para o consumo do painel de BI.
 
-2. Data Quality (Great Expectations): O Great Expectations atua na camada Raw, logo após a ingestão. Validar o dado bruto antes da limpeza permite que o relatório de qualidade reflita a realidade exata da fonte, documentando anomalias que seriam mascaradas se a validação fosse pós-limpeza.
-   * *Nota sobre a Severidade de Alertas (Modo Sandbox vs. Produção):* No pipeline deste desafio, as violações de contrato de dados emitem um log de nível `CRITICAL` na UI do Airflow, mas permitem que o fluxo continue. Esta foi uma decisão de design exclusiva para esta avaliação técnica (PoC/Sandbox), visando dar máxima visibilidade visual ao examinador sobre a capacidade de varredura das regras. Em um ambiente produtivo real com dados contínuos, essa severidade estaria atrelada a uma interrupção imediata da esteira (`sys.exit(1)`) ou ao desvio dos registros corrompidos para uma Dead Letter Queue (DLQ), mitigando o risco de corrupção do Data Lake.
+2. Data Quality: O Great Expectations atua na camada Raw, logo após a ingestão. Validar o dado bruto antes da limpeza permite que o relatório de qualidade reflita a realidade exata da fonte, documentando anomalias que seriam mascaradas se a validação fosse pós-limpeza.
 
 3. Arquitetura Metadata-Driven: As regras de validação não estão "hardcoded". Elas residem em arquivos JSON (`gx/expectations/`), permitindo que as regras sejam dinâmicas sem necessidade de recompilar o código de processamento.
 
@@ -48,7 +47,7 @@ O pipeline estrutura os dados em camadas lógicas progressivas de refinamento:
 7. Criação de um dashboard: para permitir visualizar os requisitos do desafio e tambem para analisar a silver e o resultado do Data Quality.
 
 ## ESTRUTURA DO PROJETO 
-```text
+```
 desafio_localiza
 ├── dags/                # Definições de DAGs do Airflow
 ├── src/                 # Script principal de processamento PySpark
@@ -81,44 +80,28 @@ O escopo de validação do arquivo **`suite_desafio.json`** opera em três níve
 
 3. Validação de Padrão (Regex para Higienização):
    - "expect_column_values_to_match_regex": Na coluna `risk_score`, utiliza a expressão `^[0-9]+(\.[0-9]+)?$` para varrer linha a linha e identificar sujeiras em formato de texto (como a string "none" presente na origem). Essa validação em nível de linha é o que permite ao relatório HTML apontar o percentual exato de anomalias antes que o PySpark force o cast numérico.
-
-## ⚡ AVALIAÇÃO RÁPIDA (FAST-TRACK)
-Para otimizar o tempo de avaliação técnica, o repositório já vem provisionado com os principais artefatos finais pré-processados, dispensando a necessidade de execução inicial:
-
-* **Camadas Silver e Gold (`data/output/`):** Os diretórios já contêm os arquivos Parquet estruturados, tipados e refinados prontos para análise.
-* **Relatório de Data Quality (`gx/uncommitted/data_quality_report.html`):** O relatório HTML interativo gerado pelo Great Expectations está disponível para consulta imediata. Ele pode ser aberto diretamente em qualquer navegador para inspecionar os indicadores de conformidade, volumetria de nulos e as anomalias estruturais identificadas na fonte bruta.
-
-A execução completa via Airflow (descrita abaixo) é totalmente suportada, idempotente e serve para demonstrar a engenharia de orquestração e robustez do ambiente produtivo.
-
-## 📊 RESULTADOS DO DESAFIO (PREVIEW)
-Abaixo estão as prévias em formato tabular dos artefatos gerados na camada Gold, atendendo estritamente aos requisitos de negócio solicitados:
-
-### Tabela 1: Média de "risk_score" por "location_region" e Tabela 2: Top 3 transações mais recentes (sale) por "receiving_address"
-![Tabela 1 - Agrupamento e Ordenação](assets/stream_resultado.png)
-
+   
 ## COMO EXECUTAR 
 
 1. Inicialização:
-    Na raiz do projeto, execute o comando abaixo no terminal para construir a imagem otimizada e subir os serviços:
-    ```bash
-    docker-compose up -d --build
-    ```
+Na raiz do projeto, execute o comando abaixo no terminal para construir a imagem otimizada e subir os serviços:
+   ```bash
+   docker-compose up -d --build
+   ```
 
 2. Orquestração (Airflow):
 Acesse http://localhost:8080 (Usuário/Senha: admin / admin).
-   * Ative a DAG pipeline_localiza_desafio e dispare manualmente (Trigger DAG).
-   * Acompanhe o processamento em tempo real através da aba Logs da task run_pyspark_and_dq. Os logs contornam o buffer padrão do Python via biblioteca logging, garantindo rastreabilidade técnica imersiva.
+* Ative a DAG pipeline_localiza_desafio e dispare manualmente (Trigger DAG).
+* Acompanhe o processamento em tempo real através da aba Logs da task run_pyspark_and_dq. Os logs contornam o buffer padrão do Python via biblioteca logging, garantindo rastreabilidade técnica imersiva.
 
-1. Visualização de Resultados (Dashboard):
-    Acesse http://localhost:8081 para o portal interativo de resultados.
-    * Aba **Camada Gold (Negócio)**: Visualização das tabelas do Desafio
-    ![Mostra o resultado do desafio](assets/stream_gold.png)
-
-    * Aba **Camada Silver (Tratada)**: Visualização da tabela dos dados tratados
-    ![Mostra o resultado da limpeza, antes de gerar para GOLD](assets/stream_silver.png)
-    
-    * Aba **Data Quality (RAW)**: Visualização interativa do Data Docs do Great Expectations (diagnóstico de anomalias da fonte).
-    ![Data quality gerado pelo Great Expectations](assets/stream_dq.png)
+3. Visualização de Resultados (Dashboard):
+Acesse http://localhost:8081 para o portal interativo de resultados.
+* Aba **Camada Gold (Negócio)**: Visualização das tabelas do Desafio
+   ![Mostra o resultado do desafio](assets/stream_gold.png)
+* Aba **Camada Silver (Tratada)**: Visualização das tabelas do Desafio
+   ![Mostra o resultado da limpeza, antes de gerar para GOLD](assets/stream_silver.png)
+* Aba **Data Quality (RAW)**: Visualização interativa do Data Docs do Great Expectations (diagnóstico de anomalias da fonte).
+![Data quality gerado pelo Great Expectations](assets/stream_dq.png)
 
 
 ## MELHORIAS FUTURAS
@@ -129,7 +112,6 @@ Implementar uma bifurcação no fluxo do PySpark para que registros que violem o
 2. Telemetria de Baixo Custo (PySpark Observation):
 Para escalas muito maiores de registros, a extração de métricas de qualidade seria migrada para a API nativa `Observation` do PySpark. Isso permite calcular metadados técnicos "pegando carona" na Action de gravação das informações finais em uma única passagem de memória (Single-Pass), reduzindo a fatura de compute (FinOps).
 
-3. Evolução para Cargas Incrementais (Upsert): Em um cenário produtivo real com ingestão contínua, a gravação na camada Silver seria transicionada de *Overwrite* para *Upsert* (através da adoção de formatos de tabela transacionais como Delta Lake ou Apache Iceberg). Isso garantiria a atualização isolada de registros alterados na origem, eliminando a necessidade de reprocessamento full da base e otimizando os custos de I/O na nuvem.
 
 ## DESTAQUES DE EFICIÊNCIA NO CÓDIGO 
 * Coalesce(1): Utilizado na escrita final para evitar a fragmentação de disco (Small Files Problem) neste ambiente de teste local.
@@ -151,7 +133,7 @@ Para escalas muito maiores de registros, a extração de métricas de qualidade 
 <a href="mailto:Paulofernando.justino@gmail.com">
   <img src="https://img.shields.io/badge/Gmail-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Gmail" />
 </a>
-<a href="https://www.linkedin.com/in/paulo-justino-data/">
+<a href="https://https://www.linkedin.com/in/paulo-justino-data/">
   <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" />
 </a>
 

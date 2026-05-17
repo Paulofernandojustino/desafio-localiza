@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.operators.bash import BashOperator
+from airflow.operators.email import EmailOperator
 from datetime import datetime, timedelta
 
 default_args = {
@@ -28,5 +29,11 @@ with DAG(
         task_id='run_pyspark_and_dq',
         bash_command='python -u /opt/airflow/src/process_data.py',
     )
+    
+    # Simulação da notificação para ambiente local/sandbox
+    envio_email_qualidade = BashOperator(
+        task_id='send_dq_report',
+        bash_command='echo "Simulação: Relatório enviado para o email da governança com o anexo /opt/airflow/gx/uncommitted/data_quality_report.html"'
+    )
 
-    executar_pipeline
+    executar_pipeline >> envio_email_qualidade
