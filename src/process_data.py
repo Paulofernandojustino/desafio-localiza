@@ -1,5 +1,6 @@
 import json
 import sys
+import os
 import logging
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql.functions import col, avg, desc, row_number, regexp_replace, when, to_date, date_format, from_unixtime, lower
@@ -168,6 +169,19 @@ def create_gold_table2(df_clean: DataFrame) -> None:
     save_as_parquet(df_tabela2_output, "/opt/airflow/data/output/gold/tabela2_top3_sales")
 
 def main() -> None:
+    
+    caminho_input = "/opt/airflow/data/input/df_fraud_credit.csv"
+    
+    # 2. Validação Defensiva (Fail-Fast): Checa a existência do arquivo local no container
+    if not os.path.exists(caminho_input):
+        logger.critical(
+            f"❌ CONTRATO DE INFRAESTRUTURA VIOLADO: O arquivo de input não foi encontrado em: {caminho_input}. "
+            "Certifique-se de que o arquivo físico foi baixado (caso esteja no .gitignore) "
+            "e que os volumes estão mapeados corretamente no docker-compose.yaml."
+        )
+        # Encerra o script com código de erro 1, fazendo a task do Airflow falhar imediatamente
+        sys.exit(1)
+    
     logger.info("Inicializando SparkSession...")
     spark = SparkSession.builder \
         .appName("PipelineLocaliza_Desafio") \
@@ -176,7 +190,7 @@ def main() -> None:
     spark.sparkContext.setLogLevel("ERROR")
    
     logger.info("1. Iniciando ingestão de dados da camada Raw...")
-    df = spark.read.csv("/opt/airflow/data/input/df_fraud_credit.csv", header=True, inferSchema=True)
+    df = spark.read.csv(caminho_input, header=True, inferSchema=True)
     
     logger.info("2. Executando validação de Data Quality...")
     is_valid = validate_data(df)
